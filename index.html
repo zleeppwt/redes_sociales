@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Hub | Mis Redes Oficiales</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'blob': 'blob 8s infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -40px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-black text-zinc-100 font-sans min-h-screen relative overflow-x-hidden selection:bg-zinc-700 selection:text-white flex flex-col items-center justify-center p-4 sm:p-6">
+
+    <!-- Fondo Ambiental Ultra Sutil (Negro Profundo / OLED) -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900/40 via-black to-black">
+        <div class="absolute top-[-10%] left-[-10%] w-80 h-80 sm:w-96 sm:h-96 bg-zinc-700/10 rounded-full mix-blend-screen filter blur-3xl animate-blob"></div>
+        <div class="absolute top-[20%] right-[-10%] w-80 h-80 sm:w-96 sm:h-96 bg-purple-900/10 rounded-full mix-blend-screen filter blur-3xl animate-blob" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-[-10%] left-[20%] w-80 h-80 sm:w-96 sm:h-96 bg-cyan-900/10 rounded-full mix-blend-screen filter blur-3xl animate-blob" style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Barra Superior Flotante: Compartir y Edición Rápida -->
+    <div class="fixed top-4 right-4 sm:top-6 sm:right-6 z-40 flex items-center gap-2.5">
+        <button id="btn-share" onclick="copyPageLink()" title="Copiar enlace de esta página" 
+            class="flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-[#09090b]/90 hover:bg-zinc-900 backdrop-blur-md border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white text-xs sm:text-sm font-medium transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 cursor-pointer">
+            <i class="fa-solid fa-share-nodes text-zinc-400"></i>
+            <span class="hidden sm:inline">Compartir</span>
+        </button>
+
+        <button id="btn-edit-mode" onclick="toggleEditModal(true)" title="Personalizar enlaces y perfil" 
+            class="flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-[#09090b]/90 hover:bg-zinc-900 backdrop-blur-md border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white text-xs sm:text-sm font-medium transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 cursor-pointer">
+            <i class="fa-solid fa-pen-to-square text-zinc-400"></i>
+            <span>Editar</span>
+        </button>
+    </div>
+
+    <!-- Contenedor Principal (Tarjeta Negro Carbón) -->
+    <main class="relative z-10 w-full max-w-md mx-auto my-12 animate-fade-in">
+        
+        <!-- Tarjeta de Perfil -->
+        <div class="bg-[#09090b]/90 backdrop-blur-xl border border-zinc-800/80 rounded-3xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.95)]">
+            
+            <!-- Cabecera de Perfil -->
+            <div class="flex flex-col items-center text-center mb-8">
+                <!-- Avatar con anillo oscuro elegante -->
+                <div class="relative group mb-4">
+                    <div class="absolute -inset-0.5 bg-gradient-to-tr from-zinc-700 via-zinc-400 to-zinc-800 rounded-full blur-[2px] opacity-60 group-hover:opacity-100 transition duration-500"></div>
+                    <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-black border-2 border-black flex items-center justify-center">
+                        <img id="display-avatar" 
+                             src="img/img1.jpg" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/300x300/09090b/a1a1aa?text=Avatar';"
+                             alt="Foto de perfil" 
+                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    </div>
+                    <!-- Indicador de estado en línea -->
+                    <span title="Activo ahora" class="absolute bottom-1 right-1 w-5 h-5 bg-emerald-500 border-4 border-[#09090b] rounded-full"></span>
+                </div>
+
+                <!-- Nombre y Verificado -->
+                <div class="flex items-center justify-center gap-1.5 mb-1">
+                    <h1 id="display-name" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                        @TuUsuario
+                    </h1>
+                    <i class="fa-solid fa-circle-check text-zinc-200 text-base sm:text-lg" title="Perfil Oficial"></i>
+                </div>
+
+                <!-- Biografía -->
+                <p id="display-bio" class="text-zinc-400 text-sm sm:text-base max-w-xs leading-relaxed mt-1">
+                    Creador de contenido, gamer y amante de la música. ¡Conecta conmigo en todas mis redes! ✨🎮🎵
+                </p>
+            </div>
+
+            <!-- Lista de Botones de Redes Sociales -->
+            <div class="space-y-3" id="links-container">
+
+                <!-- 1. TIKTOK -->
+                <a id="link-tiktok" href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer"
+                   class="group relative flex items-center justify-between w-full p-4 rounded-2xl bg-zinc-950/90 hover:bg-zinc-900/90 border border-zinc-800/90 hover:border-cyan-400/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_25px_-5px_rgba(0,242,234,0.2)]">
+                    <div class="flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-xl bg-black border border-zinc-800 flex items-center justify-center text-white text-xl shadow-inner group-hover:scale-105 transition-transform duration-300 relative overflow-hidden">
+                            <i class="fa-brands fa-tiktok relative z-10 drop-shadow-[2px_2px_0px_#ff0050] [-webkit-text-stroke:0.5px_#00f2ea]"></i>
+                        </div>
+                        <div class="text-left">
+                            <span class="block font-bold text-zinc-100 text-base group-hover:text-cyan-300 transition-colors">TikTok</span>
+                            <span id="handle-tiktok" class="block text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors">Videos cortos y clips</span>
+                        </div>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800/80 flex items-center justify-center text-zinc-500 group-hover:text-cyan-300 group-hover:border-cyan-500/30 transition-all">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 2. INSTAGRAM -->
+                <a id="link-instagram" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer"
+                   class="group relative flex items-center justify-between w-full p-4 rounded-2xl bg-zinc-950/90 hover:bg-zinc-900/90 border border-zinc-800/90 hover:border-pink-500/50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_25px_-5px_rgba(236,72,153,0.22)]">
+                    <div class="flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 flex items-center justify-center text-white text-xl shadow-md group-hover:scale-105 transition-transform duration-300">
+                            <i class="fa-brands fa-instagram"></i>
+                        </div>
+                        <div class="text-left">
+                            <span class="block font-bold text-zinc-100 text-base group-hover:text-pink-300 transition-colors">Instagram</span>
+                            <span id="handle-instagram" class="block text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors">Fotos, historias y reels</span>
+                        </div>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800/80 flex items-center justify-center text-zinc-500 group-hover:text-pink-300 group-hover:border-pink-500/30 transition-all">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 3. DISCORD (Con acción de copiar usuario y enlace) -->
+                <div class="group relative flex items-center justify-between w-full p-4 rounded-2xl bg-zinc-950/90 hover:bg-zinc-900/90 border border-zinc-800/90 hover:border-[#5865F2]/60 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_25px_-5px_rgba(88,101,242,0.25)]">
+                    <a id="link-discord" href="https://discord.com/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 flex-1 min-w-0">
+                        <div class="w-11 h-11 shrink-0 rounded-xl bg-[#5865F2] flex items-center justify-center text-white text-xl shadow-md group-hover:scale-105 transition-transform duration-300">
+                            <i class="fa-brands fa-discord"></i>
+                        </div>
+                        <div class="text-left truncate pr-2">
+                            <span class="block font-bold text-zinc-100 text-base group-hover:text-[#8ea1e1] transition-colors">Discord</span>
+                            <span id="handle-discord" class="block text-xs text-zinc-500 group-hover:text-zinc-400 truncate transition-colors">usuario#0000 • Servidor</span>
+                        </div>
+                    </a>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <!-- Botón rápido para copiar tag de Discord -->
+                        <button onclick="copyDiscordUser()" title="Copiar usuario de Discord"
+                            class="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-[#5865F2] border border-zinc-800 hover:border-[#5865F2] text-zinc-400 hover:text-white text-xs font-medium transition-colors cursor-pointer flex items-center gap-1">
+                            <i class="fa-regular fa-copy"></i>
+                            <span class="hidden sm:inline">Copiar</span>
+                        </button>
+                        <a id="link-discord-arrow" href="https://discord.com/" target="_blank" rel="noopener noreferrer" title="Abrir servidor de Discord"
+                           class="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800/80 flex items-center justify-center text-zinc-500 hover:text-[#8ea1e1] hover:border-[#5865F2]/40 transition-all">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 4. ROBLOX -->
+                <a id="link-roblox" href="https://www.roblox.com/" target="_blank" rel="noopener noreferrer"
+                   class="group relative flex items-center justify-between w-full p-4 rounded-2xl bg-zinc-950/90 hover:bg-zinc-900/90 border border-zinc-800/90 hover:border-zinc-500/60 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_25px_-5px_rgba(255,255,255,0.12)]">
+                    <div class="flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-zinc-200 to-zinc-400 flex items-center justify-center text-black shadow-md group-hover:scale-105 transition-transform duration-300">
+                            <!-- SVG Oficial/Representativo de Roblox (Cuadrado inclinado con hueco) -->
+                            <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M5.164 0L.16 18.928L18.836 24L23.84 5.072L5.164 0ZM14.023 15.208L8.792 13.785L10.215 8.554L15.446 9.977L14.023 15.208Z"/>
+                            </svg>
+                        </div>
+                        <div class="text-left">
+                            <span class="block font-bold text-zinc-100 text-base group-hover:text-white transition-colors">Roblox</span>
+                            <span id="handle-roblox" class="block text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors">Únete a mis partidas</span>
+                        </div>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800/80 flex items-center justify-center text-zinc-500 group-hover:text-white group-hover:border-zinc-600 transition-all">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    </div>
+                </a>
+
+                <!-- 5. SPOTIFY -->
+                <a id="link-spotify" href="https://open.spotify.com/" target="_blank" rel="noopener noreferrer"
+                   class="group relative flex items-center justify-between w-full p-4 rounded-2xl bg-zinc-950/90 hover:bg-zinc-900/90 border border-zinc-800/90 hover:border-[#1DB954]/60 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_25px_-5px_rgba(29,185,84,0.22)]">
+                    <div class="flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-xl bg-[#1DB954] flex items-center justify-center text-black text-2xl shadow-md group-hover:scale-105 transition-transform duration-300">
+                            <i class="fa-brands fa-spotify"></i>
+                        </div>
+                        <div class="text-left">
+                            <span class="block font-bold text-zinc-100 text-base group-hover:text-[#1ed760] transition-colors">Spotify</span>
+                            <span id="handle-spotify" class="block text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors">Mis playlists favoritas</span>
+                        </div>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800/80 flex items-center justify-center text-zinc-500 group-hover:text-[#1ed760] group-hover:border-[#1DB954]/40 transition-all">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    </div>
+                </a>
+
+            </div>
+
+            <!-- Pie de tarjeta -->
+            <div class="mt-8 pt-5 border-t border-zinc-900 text-center">
+                <p class="text-xs text-zinc-600">
+                    Haz clic en cualquier plataforma para conectar • <button onclick="toggleEditModal(true)" class="text-zinc-400 hover:text-white underline cursor-pointer">Personalizar</button>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL DE EDICIÓN RÁPIDA -->
+    <div id="edit-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/90 backdrop-blur-md transition-opacity">
+        <div class="bg-[#09090b] border border-zinc-800 rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 sm:p-8 shadow-2xl">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-zinc-800/80">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-zinc-400"></i> Edición Rápida
+                    </h2>
+                    <p class="text-xs text-zinc-500 mt-0.5">Personaliza tu perfil y enlaces. Se guardarán en tu navegador.</p>
+                </div>
+                <button onclick="toggleEditModal(false)" class="w-8 h-8 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="edit-form" onsubmit="saveProfileData(event)" class="space-y-4">
+                <!-- Datos de Perfil -->
+                <div class="space-y-3 bg-black p-4 rounded-2xl border border-zinc-800/80">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Información del Perfil</h3>
+                    
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-400 mb-1">Nombre o Usuario Principal</label>
+                        <input type="text" id="input-name" placeholder="@TuUsuario" required
+                            class="w-full px-3.5 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white text-sm focus:outline-none focus:border-zinc-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-400 mb-1">Biografía Corta</label>
+                        <textarea id="input-bio" rows="2" placeholder="Escribe algo sobre ti..."
+                            class="w-full px-3.5 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white text-sm focus:outline-none focus:border-zinc-500"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-400 mb-1">URL de Imagen de Avatar</label>
+                        <input type="url" id="input-avatar" placeholder="https://ejemplo.com/mi-foto.jpg"
+                            class="w-full px-3.5 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white text-sm focus:outline-none focus:border-zinc-500">
+                    </div>
+                </div>
+
+                <!-- Enlaces de Redes Sociales -->
+                <div class="space-y-3 bg-black p-4 rounded-2xl border border-zinc-800/80">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Tus Enlaces</h3>
+
+                    <!-- TikTok -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1"><i class="fa-brands fa-tiktok mr-1"></i> URL de TikTok</label>
+                            <input type="url" id="input-tiktok-url" placeholder="https://tiktok.com/@usuario"
+                                class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white text-xs focus:outline-none focus:border-cyan-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1">Subtítulo / @Usuario</label>
+                            <input type="text" id="input-tiktok-handle" placeholder="@usuario"
+                                class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white text-xs focus:outline-none focus:border-cyan-400">
+                        </div>
+                    </div>
+
+                    <!-- Instagram -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-zinc-900">
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1"><i class="fa-brands fa-instagram mr-1 text-pink-400"></i> URL de Instagram</label>
+                            <input type="url" id="input-ig-url" placeholder="https://instagram.com/usuario"
+                                class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white text-xs focus:outline-none focus:border-pink-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1">Subtítulo / @Usuario</label>
+                            <input type="text" id="input-ig-handle" placeholder="@usuario"
+                                class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white text-xs focus:outline-none focus:border-pink-400">
+                        </div>
+                    </div>
+
+                    <!-- Discord -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-zinc-900">
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1"><i class="fa-brands fa-discord mr-1 text-indigo-400"></i> Enlace Servidor / Perfil</label>
+                            <input type="url" id="input-discord-url" placeholder="https://discord.gg/invitacion"
+                                class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white text-xs focus:outline-none focus:border-indigo-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1">Usuario Discord (Para copiar)</label>
+                            <input type="text" id="input-discord-user" placeholder="miusuario"
+                                class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white text-xs focus:outline-none focus:border-indigo-400">
+                        </div>
+                    </div>
+
+                    <!-- Roblox -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-zinc-900">
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1"><i class="fa-solid fa-gamepad mr-1"></i> URL Perfil de Roblox</label>
+                            <input type="url" id="input-roblox-url" placeholder="https://www.roblox.com/users/..."
+                                class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white text-xs focus:outline-none focus:border-zinc-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1">Subtítulo / Usuario Roblox</label>
+                            <input type="text" id="input-roblox-handle" placeholder="UsuarioRoblox"
+                                class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white text-xs focus:outline-none focus:border-zinc-500">
+                        </div>
+                    </div>
+
+                    <!-- Spotify -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-zinc-900">
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1"><i class="fa-brands fa-spotify mr-1 text-emerald-400"></i> URL Perfil / Playlist</label>
+                            <input type="url" id="input-spotify-url" placeholder="https://open.spotify.com/user/..."
+                                class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white text-xs focus:outline-none focus:border-emerald-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-zinc-400 mb-1">Subtítulo / Playlist</label>
+                            <input type="text" id="input-spotify-handle" placeholder="Mis playlists favoritas"
+                                class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-white text-xs focus:outline-none focus:border-emerald-400">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción del Modal -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                    <button type="button" onclick="resetDefaults()" class="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-red-950/60 border border-zinc-800 text-zinc-400 hover:text-red-400 text-xs font-medium transition-colors cursor-pointer">
+                        Restaurar valores
+                    </button>
+                    <div class="flex items-center gap-2 ml-auto">
+                        <button type="button" onclick="toggleEditModal(false)" class="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-sm font-medium transition-colors cursor-pointer">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black text-sm font-bold shadow-lg transition-all cursor-pointer">
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notificación Toast Flotante (Reemplaza a alert) -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-zinc-950/95 backdrop-blur-md border border-zinc-800 text-white text-sm font-medium shadow-2xl transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toast-message">¡Copiado al portapapeles!</span>
+    </div>
+
+    <script>
+        // Configuración por defecto del Social Hub
+        const DEFAULT_DATA = {
+            name: "@ZLEEPPWT",
+
+            bio: "꒷꒦　　Gustos　꒷꒦Forsaken.Roblox.Minecraft.Cry of fear ",
+            avatar: "img/img1.jpg",
+            tiktokUrl: "https://www.tiktok.com/@zleeppwt?_r=1&_t=ZS-9BYFzlZ2qLi",
+            tiktokHandle: "ㅤㅤ◠ㅤㅤ  𖹭ㅤㅤㅤ@zleeppwt   ℘ㅤㅤꮽꮾ",
+            igUrl: "https://www.instagram.com/zleeppx_viil?evlk=MW40YnM0djhseGI2eA%3D%3D&utm_source=qr",
+            igHandle: "ㅤㅤ◠ㅤㅤ  𖹭ㅤㅤㅤ@zleeppx_viil   ℘ㅤㅤꮽꮾ",
+            discordUrl: "https://discord.com/users/1522042889667088534",
+            discordUser: "ㅤㅤ◠ㅤㅤ  𖹭ㅤㅤㅤ@zleeppwt.   ℘ㅤㅤꮽꮾ",
+            robloxUrl: "https://www.roblox.com/es/users/7976810064/profile",
+            robloxHandle: "ㅤㅤ◠ㅤㅤ  𖹭ㅤㅤㅤ@Kaiimichael1   ℘ㅤㅤꮽꮾ",
+            spotifyUrl: "https://open.spotify.com/user/31ud5biqrt2453fqnriky7iihbqu?si=jnHPdkmoT0G4_z-ljEQmIg&utm_source=copy-link",
+            spotifyHandle: "ㅤㅤ◠ㅤㅤ  𖹭ㅤㅤㅤ@Zleepp   ℘ㅤㅤꮽꮾ"
+        };
+
+        const STORAGE_KEY = "social_hub_profile_v1";
+        let currentData = { ...DEFAULT_DATA };
+
+        // Cargar datos desde localStorage al iniciar
+        function loadProfileData() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    currentData = { ...DEFAULT_DATA, ...JSON.parse(saved) };
+                }
+            } catch (e) {
+                console.error("Error leyendo localStorage:", e);
+            }
+            renderUI();
+        }
+
+        // Actualizar la interfaz visual con los datos actuales
+        function renderUI() {
+            document.getElementById("display-name").textContent = currentData.name;
+            document.getElementById("display-bio").textContent = currentData.bio;
+            
+            const avatarEl = document.getElementById("display-avatar");
+            avatarEl.src = currentData.avatar || DEFAULT_DATA.avatar;
+
+            // TikTok
+            document.getElementById("link-tiktok").href = currentData.tiktokUrl || "#";
+            document.getElementById("handle-tiktok").textContent = currentData.tiktokHandle;
+
+            // Instagram
+            document.getElementById("link-instagram").href = currentData.igUrl || "#";
+            document.getElementById("handle-instagram").textContent = currentData.igHandle;
+
+            // Discord
+            document.getElementById("link-discord").href = currentData.discordUrl || "#";
+            document.getElementById("link-discord-arrow").href = currentData.discordUrl || "#";
+            document.getElementById("handle-discord").textContent = `${currentData.discordUser} • Comunidad`;
+
+            // Roblox
+            document.getElementById("link-roblox").href = currentData.robloxUrl || "#";
+            document.getElementById("handle-roblox").textContent = currentData.robloxHandle;
+
+            // Spotify
+            document.getElementById("link-spotify").href = currentData.spotifyUrl || "#";
+            document.getElementById("handle-spotify").textContent = currentData.spotifyHandle;
+        }
+
+        // Abrir o cerrar el modal de edición
+        function toggleEditModal(show) {
+            const modal = document.getElementById("edit-modal");
+            if (show) {
+                // Rellenar inputs con los datos actuales
+                document.getElementById("input-name").value = currentData.name;
+                document.getElementById("input-bio").value = currentData.bio;
+                document.getElementById("input-avatar").value = currentData.avatar;
+                
+                document.getElementById("input-tiktok-url").value = currentData.tiktokUrl;
+                document.getElementById("input-tiktok-handle").value = currentData.tiktokHandle;
+                
+                document.getElementById("input-ig-url").value = currentData.igUrl;
+                document.getElementById("input-ig-handle").value = currentData.igHandle;
+                
+                document.getElementById("input-discord-url").value = currentData.discordUrl;
+                document.getElementById("input-discord-user").value = currentData.discordUser;
+                
+                document.getElementById("input-roblox-url").value = currentData.robloxUrl;
+                document.getElementById("input-roblox-handle").value = currentData.robloxHandle;
+                
+                document.getElementById("input-spotify-url").value = currentData.spotifyUrl;
+                document.getElementById("input-spotify-handle").value = currentData.spotifyHandle;
+
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+            } else {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
+        }
+
+        // Guardar cambios del formulario
+        function saveProfileData(event) {
+            event.preventDefault();
+            
+            currentData = {
+                name: document.getElementById("input-name").value.trim() || DEFAULT_DATA.name,
+                bio: document.getElementById("input-bio").value.trim(),
+                avatar: document.getElementById("input-avatar").value.trim() || DEFAULT_DATA.avatar,
+                
+                tiktokUrl: document.getElementById("input-tiktok-url").value.trim() || "https://www.tiktok.com/",
+                tiktokHandle: document.getElementById("input-tiktok-handle").value.trim() || "TikTok Oficial",
+                
+                igUrl: document.getElementById("input-ig-url").value.trim() || "https://www.instagram.com/",
+                igHandle: document.getElementById("input-ig-handle").value.trim() || "Instagram Oficial",
+                
+                discordUrl: document.getElementById("input-discord-url").value.trim() || "https://discord.com/",
+                discordUser: document.getElementById("input-discord-user").value.trim() || "usuario",
+                
+                robloxUrl: document.getElementById("input-roblox-url").value.trim() || "https://www.roblox.com/",
+                robloxHandle: document.getElementById("input-roblox-handle").value.trim() || "Perfil de Roblox",
+                
+                spotifyUrl: document.getElementById("input-spotify-url").value.trim() || "https://open.spotify.com/",
+                spotifyHandle: document.getElementById("input-spotify-handle").value.trim() || "Playlists en Spotify"
+            };
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(currentData));
+            } catch (e) {
+                console.error("No se pudo guardar en localStorage:", e);
+            }
+
+            renderUI();
+            toggleEditModal(false);
+            showToast("¡Perfil y enlaces actualizados!", "fa-circle-check text-emerald-400");
+        }
+
+        // Restaurar valores iniciales
+        function resetDefaults() {
+            currentData = { ...DEFAULT_DATA };
+            localStorage.removeItem(STORAGE_KEY);
+            renderUI();
+            toggleEditModal(false);
+            showToast("Valores restaurados por defecto", "fa-rotate-left text-cyan-400");
+        }
+
+        // Función auxiliar para copiar texto compatible con iframes
+        function copyToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.error('Error al copiar:', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Copiar usuario de Discord
+        function copyDiscordUser() {
+            copyToClipboard(currentData.discordUser);
+            showToast(`Usuario "${currentData.discordUser}" copiado`, "fa-brands fa-discord text-indigo-400");
+        }
+
+        // Copiar enlace de la página
+        function copyPageLink() {
+            copyToClipboard(window.location.href);
+            showToast("¡Enlace de la página copiado!", "fa-link text-cyan-400");
+        }
+
+        // Mostrar notificación Toast
+        let toastTimeout;
+        function showToast(message, iconClasses) {
+            const toast = document.getElementById("toast");
+            const toastMsg = document.getElementById("toast-message");
+            const toastIcon = document.getElementById("toast-icon");
+
+            toastMsg.textContent = message;
+            toastIcon.className = `${iconClasses}`;
+
+            toast.classList.remove("opacity-0", "translate-y-4");
+            toast.classList.add("opacity-100", "translate-y-0");
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove("opacity-100", "translate-y-0");
+                toast.classList.add("opacity-0", "translate-y-4");
+            }, 3000);
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        document.getElementById("edit-modal").addEventListener("click", function(e) {
+            if (e.target === this) {
+                toggleEditModal(false);
+            }
+        });
+
+        // Inicializar al cargar
+        window.addEventListener("DOMContentLoaded", loadProfileData);
+    </script>
+</body>
+</html>
